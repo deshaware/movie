@@ -15,8 +15,10 @@ app.use(bodyParser.urlencoded({
 app.get('/',(req,res)=>res.send(`Movie server is up and running`));
 
 //routes
-const role = require('./routes/role/role')
-const user = require('./routes/user/user')
+const role = require('./routes/api/role')
+const user = require('./routes/api/user')
+const movie = require('./routes/api/movie')
+app.use('/api/movies',movie);
 app.use('/api/users',user);
 app.use('/api/roles',role);
 

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const _ = require('lodash')
-const Role = require('../../models/Role');
+const Role = require('../../models/Role')
 
 
 /**

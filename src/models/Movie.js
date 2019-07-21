@@ -23,7 +23,15 @@ const movieSchema = new mongoose.Schema({
     "editor":{
         type: mongoose.Types.ObjectId,
         ref:'User'
-    }
-});
+    },
+    "isDeleted":{
+        type:Boolean
+    },
+    "visibleTo":[{
+        type:String
+    }]
+},{timestamps:true});
+
+
 
 module.exports = Movie = mongoose.model('Movie',movieSchema);
