@@ -4,7 +4,7 @@ const roleSchema = new mongoose.Schema({
     user_id:{
         type: mongoose.Types.ObjectId
     },
-    roleName:{
+    role:{
         type: String,
         required: true,
     },

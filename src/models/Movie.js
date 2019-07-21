@@ -19,6 +19,10 @@ const movieSchema = new mongoose.Schema({
         type: String,
         required: true,
         index:true
+    },
+    "editor":{
+        type: mongoose.Types.ObjectId,
+        ref:'User'
     }
 });
 
