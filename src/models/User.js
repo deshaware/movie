@@ -66,6 +66,9 @@ userSchema.methods.generateAuthToken = async function(){
 // Hash the plain text password before saving
 userSchema.pre('save', async function (next){
     const user = this;
+    const emailCount = await mongoose.models.User.countDocuments({email: user.email  });
+    if(emailCount>1)
+        throw new Error(`User with email ${user.email} already exist`)
     if(user.isModified("password")){
         user.password = await bcrypt.hash(user.password,8);
     }
@@ -84,12 +87,12 @@ userSchema.statics.findByCredentials = async (email, password) => {
     return user
 }
 
-// unique does not work, hence working on 
-userSchema.path('email').validate( async (value,done) => {
-    const emailCount = await mongoose.models.User.countDocuments({email: value });
-    console.log(emailCount)
-    return !emailCount;
-  }, 'Email already exists');
+// // unique does not work, hence working on 
+// userSchema.path('email').validate( async (value,done) => {
+//     const emailCount = await mongoose.models.User.countDocuments({email: value });
+//     console.log(emailCount)
+//     return !emailCount;
+//   }, 'Email already exists');
 
 
 module.exports = User = mongoose.model('User',userSchema);

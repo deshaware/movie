@@ -18,7 +18,8 @@ const movieSchema = new mongoose.Schema({
     "name":{
         type: String,
         required: true,
-        index:true
+        index:true,
+        unique:true
     },
     "editor":{
         type: mongoose.Types.ObjectId,
