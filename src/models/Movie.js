@@ -8,7 +8,8 @@ const movieSchema = new mongoose.Schema({
         type: String
     },
     "genre":{
-        type: [String]
+        type: [String],
+        trim:true
     },
     "imdb_score":{
         type:Number,
@@ -17,6 +18,7 @@ const movieSchema = new mongoose.Schema({
     },
     "name":{
         type: String,
+        lowercase:true,
         required: true,
         index:true,
         unique:true
@@ -29,10 +31,20 @@ const movieSchema = new mongoose.Schema({
         type:Boolean
     },
     "visibleTo":[{
-        type:String
+        type:String,
+        trim:true
     }]
 },{timestamps:true});
 
 
+movieSchema.methods.toJSON = function(){
+    const movie = this;
+    const movieObj = movie.toObject()
+    delete movieObj.isDeleted
+    delete movieObj.editor
+    delete movieObj.createdAt
+
+    return movieObj
+}
 
 module.exports = Movie = mongoose.model('Movie',movieSchema);
