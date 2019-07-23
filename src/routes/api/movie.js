@@ -21,19 +21,23 @@ router.post('/add', auth, async ( req, res ) => {
             if(typeof movies === "object"){
                 if(Array.isArray(movies)){
                     movies.map(async m=>{
+                        if(!m.name) throw new Error(" Movie name field cannot be blank")
+                        // check if movie exist
                         m.editor = req.user._id
                         m.isDeleted = false
                         m.visibleTo = visibleTo
                         const newMovie = new Movie(m);
-                        await newMovie.save()
+                        await newMovie.save().catch(e=>{throw new Error(e)});
                     });
                 } else {
                     // single object in a a string
+                    if(!movies.name) throw new Error(" Movie name field cannot be blank")
+                        // check if movie exist
                     movies.editor = req.user._id;
                     movies.isDeleted = false;
                     movies.visibleTo = visibleTo;
                     const newMovie = new Movie(movies);
-                    await newMovie.save()
+                    await newMovie.save().catch(e=>res.status(400).send(e));
                 }
                 res.status(201).send({"data":"Movies has been succefully added"});
             }
@@ -49,8 +53,10 @@ router.post('/add', auth, async ( req, res ) => {
                 genre:req.body.genre ? req.body.genre.includes(",") ? req.body.genre.split(",") : req.body.genre : null,
                 visibleTo:req.body.visibleTo ? req.body.visibleTo.includes(",") ? req.body.visibleTo.split(",") : req.body.visibleTo:null
             }
+            
+            if(!movie.name) throw new Error(" Movie name field cannot be blank");            
             const newMovie = new Movie(movie);
-            await newMovie.save();
+            await newMovie.save().exec();
             res.status(201).send({"data":`Movie ${req.body.name} has been added succesfully`});
         }
         
@@ -102,6 +108,23 @@ router.patch('/edit/:movie_name', auth, async (req, res ) => {
         if(req.user.role === "Admin"){
             const movie = Movie.findOne({name:movieName});
             console.log(movie)
+            if(movie){
+                let updateMovie = {
+                    "99popularity":req.body._99popularity?req.body._99popularity:movie._99popularity,
+                    director: req.body.director?req.body.director:movie.director,
+                    imdb_score:req.body.imdb_score?req.body.imdb_score:movie.imdb_score,
+                    name:req.body.name,
+                    editor:req.user._id,
+                    isDeleted:false,
+                    genre:req.body.genre ? req.body.genre.includes(",") ? req.body.genre.split(",") : req.body.genre : null,
+                    visibleTo:req.body.visibleTo ? req.body.visibleTo.includes(",") ? req.body.visibleTo.split(",") : req.body.visibleTo:null
+                }
+                const newMovie = new Movie(updateMovie);
+                await newMovie.save();
+                res.status(201).send({"data":`Movie ${newMovie.name} has been edited succesfully`});
+            } else {
+                throw new Error("Movie not found")
+            }
         }
     } catch (e) {
         res.status(400).send({error:e.message});
@@ -109,23 +132,27 @@ router.patch('/edit/:movie_name', auth, async (req, res ) => {
 
 });
 
-
 // delete movie
 router.delete('/delete/:movie_name',auth, async ( req, res ) =>{
     try {
          //Admin
-        const movieName = req.params.movie_name
+        const movieName = req.params.movie_name;
         if(!movieName) throw new Error("Please provide movie name to delete");
         if(req.user.role === "Admin"){
-            let r = await Movie.deleteOne({name:movieName});
+            //soft delete
+            let r= await Movie.findOne({name:movieName.toLowerCase(), isDeleted:false});
+            r.isDeleted = true;
+            await r.save(false);
             // res.status(200).send({data:"Movie has been delete successfully"})
-            res.status(200).send({data:r})
+            res.status(200).send({data:r});
         }
         // Moderator, only momovies which has access by moderator
         if(req.user.role === "Moderator"){
             const movie_id = await Movie.findOne({name:movieName,"visibleTo":"Moderator"})._id;
             if(!movie_id) throw new Error("No movie found!!");
-            let r = await Movie.deleteOne({name:movieName});
+            let r= await Movie.findOneAndUpdate({name:movieName},{isDeleted:true});
+            r.isDeleted = true;
+            await r.save();
             // res.status(200).send({data:"Movie has been delete successfully"})
             res.status(200).send({data:r})
         }

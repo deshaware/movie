@@ -21,7 +21,6 @@ const movieSchema = new mongoose.Schema({
         lowercase:true,
         required: true,
         index:true,
-        unique:true
     },
     "editor":{
         type: mongoose.Types.ObjectId,
@@ -40,11 +39,17 @@ const movieSchema = new mongoose.Schema({
 movieSchema.methods.toJSON = function(){
     const movie = this;
     const movieObj = movie.toObject()
-    delete movieObj.isDeleted
     delete movieObj.editor
     delete movieObj.createdAt
-
+    delete movieObj.updatedAt
     return movieObj
 }
+
+movieSchema.pre('validate',true, async function(next){
+    const movie = this;
+    let count = await Movie.find({name:movie.name,isDeleted:false})
+        if(count) throw new Error("Movie already exist");
+    next();
+});
 
 module.exports = Movie = mongoose.model('Movie',movieSchema);
