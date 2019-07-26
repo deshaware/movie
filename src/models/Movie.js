@@ -19,8 +19,6 @@ const movieSchema = new mongoose.Schema({
     "name":{
         type: String,
         lowercase:true,
-        required: true,
-        index:true,
     },
     "editor":{
         type: mongoose.Types.ObjectId,
@@ -45,10 +43,10 @@ movieSchema.methods.toJSON = function(){
     return movieObj
 }
 
-movieSchema.pre('validate',true, async function(next){
+movieSchema.pre('validate', async function(next){
     const movie = this;
-    let count = await Movie.find({name:movie.name,isDeleted:false})
-        if(count) throw new Error("Movie already exist");
+    let count = await Movie.find({name:movie.name,isDeleted:false});
+            if(count.length>0) throw new Error("Movie already exist");
     next();
 });
 

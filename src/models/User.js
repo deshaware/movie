@@ -40,8 +40,7 @@ const userSchema = new mongoose.Schema({
         }
     }],
     role:{
-        type:String,
-        ref:'Role'
+        type:String      
     }
 },{timestamps:true});
 

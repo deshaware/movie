@@ -6,7 +6,7 @@ const auth = require('../../middleware/auth');
 // signup new Viewers and Moderator
 router.post('/signup', async ( req, res ) => {
     try {
-        if(!req.user.role) throw new Error("Please provide role: either Moderator or Viewer")
+        if(!req.body.role) throw new Error("Please provide role: either Moderator or Viewer")
         const user = new User(req.body)
         // req.role = await user.assignRole();
         await user.save()
