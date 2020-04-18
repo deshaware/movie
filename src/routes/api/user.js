@@ -24,16 +24,27 @@ router.get('/me', auth , async ( req, res ) => {
 });
 
 
-
 router.post('/login', async (req, res) => {
     try {
         console.log(req.body.email)
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
-        res.send({ user, token })
+        res.send({statusCode: 200, status:"Logged In Successfully", data: { user, token }})
     } catch (e) {
-        res.status(400).send()
+        console.log(e)
+        res.status(500).send({ status: 'FAILED', error: e.message})
     }
-})
+});
+
+router.post('/logout', auth, async ( req, res ) => {
+    try {
+        let result = await User.logout(req.token, req.user._id);
+        console.log(result)
+
+        res.status(200).send({ status: "SUCCES", message: "User has been logged out succesfully"});
+    } catch (error) {
+        res.status(404).send({ status: "FAILED", message: error.message });
+    }
+});
 
 module.exports = router;

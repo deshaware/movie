@@ -75,9 +75,9 @@ router.get('/all',auth, async (req, res ) => {
         } else {
             movies = await Movie.find({"visibleTo":req.user.role, "isDeleted":false});
         }    
-        res.status(200).send({movies});
+        res.status(200).send({status:"SUCCESS", data: movies});
     } catch (error) {
-        res.status(400).send({error:error.message});
+        res.status(400).send({status:"FAILED", error:error.message});
     }
 });
 

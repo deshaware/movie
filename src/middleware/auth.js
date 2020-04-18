@@ -12,6 +12,7 @@ const auth = async (req, res, next) => {
         if(!user){
             throw new Error("Unauthorized")
         }
+        //refresh token to next 5 mins
         req.token = token
         req.user = user
         next()

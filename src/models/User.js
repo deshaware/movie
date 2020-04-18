@@ -58,6 +58,7 @@ userSchema.methods.generateAuthToken = async function(){
     const user = this;
     const token = await jwt.sign({_id:user._id.toString()},secret);
     user.tokens = user.tokens.concat({token});
+    //add them in activeUser
     await user.save()
     return token
 }
@@ -83,8 +84,21 @@ userSchema.statics.findByCredentials = async (email, password) => {
     if (!isMatch) {
         throw new Error('Unable to login')
     }
-    return user
+    return user;
 }
+
+userSchema.statics.logout = async (token, userId) => {
+    try {
+        const result = await User.findOne({ _id: userId });
+        //remove the token
+        if(!result) throw new Error("User not found")
+        result.tokens = result.tokens.filter( t => t.token !== token);
+        await result.save();
+    } catch (error) {
+        console.log(error)
+        throw error;
+    }
+};
 
 // // unique does not work, hence working on 
 // userSchema.path('email').validate( async (value,done) => {
